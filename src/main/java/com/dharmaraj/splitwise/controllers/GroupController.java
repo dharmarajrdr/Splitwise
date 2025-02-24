@@ -9,6 +9,7 @@ import com.dharmaraj.splitwise.dtos.*;
 import com.dharmaraj.splitwise.exceptions.InvalidGroupException;
 import com.dharmaraj.splitwise.exceptions.InvalidUserException;
 import com.dharmaraj.splitwise.exceptions.UnAuthorizedAccessException;
+import com.dharmaraj.splitwise.models.Group;
 import com.dharmaraj.splitwise.models.GroupMember;
 import com.dharmaraj.splitwise.models.User;
 import com.dharmaraj.splitwise.services.GroupService;
@@ -19,7 +20,38 @@ public class GroupController {
     @Autowired
     private GroupService groupService;
 
+    public CreateGroupResponseDto createGroup(CreateGroupRequestDto requestDto) {
+
+        CreateGroupResponseDto createGroupResponseDto = new CreateGroupResponseDto();
+        try {
+            String name = requestDto.getName();
+            String description = requestDto.getDescription();
+            long creatorUserId = requestDto.getCreatorUserId();
+            Group group = this.groupService.createGroup(name, description, creatorUserId);
+            createGroupResponseDto.setGroup(group);
+            createGroupResponseDto.setResponseStatus(ResponseStatus.SUCCESS);
+        } catch (InvalidUserException e) {
+            createGroupResponseDto.setResponseStatus(ResponseStatus.FAILURE);
+        }
+        return createGroupResponseDto;
+    }
+
+    public DeleteGroupResponseDto deleteGroup(DeleteGroupRequestDto requestDto) {
+
+        DeleteGroupResponseDto deleteGroupResponseDto = new DeleteGroupResponseDto();
+        try {
+            long groupId = requestDto.getGroupId();
+            long userId = requestDto.getUserId();
+            this.groupService.deleteGroup(groupId, userId);
+            deleteGroupResponseDto.setResponseStatus(ResponseStatus.SUCCESS);
+        } catch (InvalidGroupException | UnAuthorizedAccessException | InvalidUserException e) {
+            deleteGroupResponseDto.setResponseStatus(ResponseStatus.FAILURE);
+        }
+        return deleteGroupResponseDto;
+    }
+
     public AddMemberResponseDto addMember(AddMemberRequestDto requestDto) {
+        
         AddMemberResponseDto addMemberResponseDto = new AddMemberResponseDto();
         try {
             long groupId = requestDto.getGroupId();
@@ -35,6 +67,7 @@ public class GroupController {
     }
 
     public RemoveMemberResponseDto removeMember(RemoveMemberRequestDto requestDto) {
+        
         RemoveMemberResponseDto removeMemberResponseDto = new RemoveMemberResponseDto();
         try {
             long groupId = requestDto.getGroupId();
@@ -49,6 +82,7 @@ public class GroupController {
     }
 
     public FetchMembersResponseDto fetchMembers(FetchMembersRequestDto requestDto) {
+        
         FetchMembersResponseDto fetchMembersResponseDto = new FetchMembersResponseDto();
         try {
             long groupId = requestDto.getGroupId();
