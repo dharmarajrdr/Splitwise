@@ -1,5 +1,6 @@
 package com.dharmaraj.splitwise.models;
 
+import java.util.Date;
 import java.util.List;
 
 import jakarta.persistence.Entity;
@@ -13,6 +14,8 @@ import lombok.Data;
 public class Group extends BaseModel {
     
     private String name;
+
+    private String description;
     
     @ManyToOne
     private User createdBy;
