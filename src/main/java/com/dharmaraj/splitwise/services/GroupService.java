@@ -92,4 +92,40 @@ public class GroupService {
         return members;
     }
 
+    public Group createGroup(String groupName, String description, long userId) throws InvalidUserException {
+
+        User user = this.userRepository.findById(userId).orElseThrow(() -> new InvalidUserException("User with id " + userId +" does not exist."));
+
+        Group group = new Group();
+        group.setName(groupName);
+        group.setDescription(description);
+        group.setCreatedAt(new Date());
+
+        this.groupRepository.save(group);
+        
+        GroupAdmin groupAdmin = new GroupAdmin();
+        groupAdmin.setGroup(group);
+        groupAdmin.setAddedBy(user);
+        groupAdmin.setAddedBy(user);
+
+        this.groupAdminRepository.save(groupAdmin);
+
+        return group;
+    }
+
+    @Transactional
+    public void deleteGroup(long groupId, long userId) throws InvalidGroupException, UnAuthorizedAccessException, InvalidUserException {
+
+        User user = this.userRepository.findById(userId).orElseThrow(() -> new InvalidUserException("User with id " + userId +" does not exist."));
+        Group group = this.groupRepository.findById(groupId).orElseThrow(() -> new InvalidGroupException("Group with id " + groupId +" does not exist."));
+
+        this.groupAdminRepository.findByGroupAndAdmin(group, user).orElseThrow(() -> new UnAuthorizedAccessException("User with id " + userId + " is not a admin of the group."));
+
+        this.groupAdminRepository.deleteByGroup(group);
+
+        this.groupMemberRepository.deleteByGroup(group);
+
+        this.groupRepository.delete(group);
+    }
+
 }
